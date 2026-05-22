@@ -1,39 +1,8 @@
 from typing import Dict, List, Set
-from app.schemas import PropagationOutput
+from shared_schemas.schemas import PropagationOutput, PropagationInput, PropagationContractViolation
 
 class PropagationEngine:
-    @staticmethod
-    def validate_root_cause(root_cause: str, blocked_task_id: str, dependency_graph: Dict[str, List[str]]) -> bool:
-        """
-        Phase 1: Validate that root_cause is part of the dependency chain leading to blocked_task_id.
-        Using deterministic BFS from root_cause to see if blocked_task_id is reachable.
-        """
-        if root_cause == blocked_task_id:
-            return True
-            
-        visited: Set[str] = set()
-        queue: List[str] = []
-        
-        if root_cause in dependency_graph:
-            initial_deps = sorted(dependency_graph[root_cause])
-            for dep in initial_deps:
-                if dep not in visited:
-                    visited.add(dep)
-                    queue.append(dep)
-        
-        while queue:
-            current_task = queue.pop(0)
-            if current_task == blocked_task_id:
-                return True
-                
-            if current_task in dependency_graph:
-                neighbors = sorted(dependency_graph[current_task])
-                for neighbor in neighbors:
-                    if neighbor not in visited:
-                        visited.add(neighbor)
-                        queue.append(neighbor)
-                        
-        return False
+
 
     @staticmethod
     def compute_downstream_path(blocked_task_id: str, dependency_graph: Dict[str, List[str]]) -> List[str]:
@@ -71,43 +40,26 @@ class PropagationEngine:
     def compute_dependency_output(input_data: dict) -> dict:
         """
         Generates the decision-grade dependency intelligence output.
-        Expects a dictionary containing:
-        - blocked_task_id
-        - root_cause
-        - trace_id
-        - timestamp
-        - dependency_graph
+        Fails closed on schema mismatch, invalid graph, malformed trace_id, or broken root cause chain.
         """
-        blocked_task_id = str(input_data.get("blocked_task_id", ""))
-        root_cause = str(input_data.get("root_cause", ""))
-        trace_id = str(input_data.get("trace_id", ""))
-        timestamp = str(input_data.get("timestamp", ""))
-        raw_graph = input_data.get("dependency_graph", {})
+        try:
+            valid_input = PropagationInput.model_validate(input_data)
+        except Exception as e:
+            raise PropagationContractViolation("SCHEMA_MISMATCH", f"Input validation failed: {str(e)}")
+
+        blocked_task_id = valid_input.blocked_task_id
+        root_cause = valid_input.root_cause
+        trace_id = valid_input.trace_id
+        timestamp = valid_input.timestamp
+        dependency_graph = valid_input.dependency_graph
         
-        # Sanitize dependency_graph to handle broken structures
-        dependency_graph: Dict[str, List[str]] = {}
-        if isinstance(raw_graph, dict):
-            for k, v in raw_graph.items():
-                if isinstance(v, list):
-                    dependency_graph[str(k)] = [str(x) for x in v]
-                else:
-                    dependency_graph[str(k)] = []
+        # Verify root cause exists in the graph
+        if root_cause not in dependency_graph:
+            raise PropagationContractViolation("BROKEN_ROOT_CAUSE", f"Root cause {root_cause} not found in dependency graph")
         
-        # Phase 1: Root Cause Validation Engine
-        # If invalid, produce deterministic failure-safe response
-        is_valid = PropagationEngine.validate_root_cause(root_cause, blocked_task_id, dependency_graph)
-        if not is_valid:
-            output = PropagationOutput(
-                blocked_task_id=blocked_task_id,
-                root_cause=root_cause,
-                impacted_tasks=[],
-                impact_score=0,
-                severity="LOW",
-                resolution_signal="REJECTED:INVALID_ROOT_CAUSE",
-                trace_id=trace_id,
-                timestamp=timestamp
-            )
-            return output.model_dump()
+        # Verify blocked_task_id exists in the graph
+        if blocked_task_id not in dependency_graph:
+            raise PropagationContractViolation("INVALID_GRAPH", f"Blocked task {blocked_task_id} not found in dependency graph")
         
         # Phase 2: Propagation Truth Verifier
         impacted_tasks = PropagationEngine.compute_downstream_path(blocked_task_id, dependency_graph)

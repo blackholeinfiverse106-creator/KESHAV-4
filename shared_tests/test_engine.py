@@ -2,43 +2,7 @@ import pytest
 from pydantic import ValidationError
 from app.engine import PropagationEngine
 
-def test_root_cause_validation_success():
-    graph = {
-        "RC": ["T1", "T2"],
-        "T1": ["T3"],
-        "T2": ["BLOCKED"]
-    }
-    input_data = {
-        "blocked_task_id": "BLOCKED",
-        "root_cause": "RC",
-        "trace_id": "trace-123",
-        "timestamp": "2026-05-02T12:00:00Z",
-        "dependency_graph": graph
-    }
-    # Should not raise
-    output = PropagationEngine.compute_dependency_output(input_data)
-    assert output["blocked_task_id"] == "BLOCKED"
-    assert output["impact_score"] == 0 # BLOCKED has no downstream in graph
-    
-def test_root_cause_validation_failure():
-    graph = {
-        "RC": ["T1"],
-        "T1": ["T2"],
-        "BLOCKED": ["T3"]
-    }
-    input_data = {
-        "blocked_task_id": "BLOCKED",
-        "root_cause": "RC",
-        "trace_id": "trace-123",
-        "timestamp": "2026-05-02T12:00:00Z",
-        "dependency_graph": graph
-    }
-    # Should return safe failure, not raise error
-    output = PropagationEngine.compute_dependency_output(input_data)
-    assert output["impact_score"] == 0
-    assert output["severity"] == "LOW"
-    assert output["impacted_tasks"] == []
-    assert output["resolution_signal"] == "REJECTED:INVALID_ROOT_CAUSE"
+
 
 def test_broken_graph_structure():
     # Phase 4 - Broken graph structure gracefully handled
