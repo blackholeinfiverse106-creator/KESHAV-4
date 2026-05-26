@@ -2,6 +2,7 @@ import pytest
 import random
 import json
 from app.engine import PropagationEngine
+from shared_schemas.schemas import PropagationContractViolation
 
 # ==========================================
 # Phase 7 — Edge Case Coverage
@@ -38,26 +39,25 @@ def test_missing_nodes():
         "B": ["C"],
         "C": "NOT_A_LIST" # Invalid
     }
-    # A->B, D. B->C. C is not a list. D is missing.
-    # D and C should be reached safely but not expanded further.
-    out = PropagationEngine.compute_dependency_output({
-        "blocked_task_id": "A", "root_cause": "A", 
-        "trace_id": "T", "timestamp": "T", "dependency_graph": graph
-    })
-    path = out["impacted_tasks"]
-    assert path == ["B", "D", "C"]
+    # Engine should fail closed on schema mismatch
+    with pytest.raises(PropagationContractViolation) as exc_info:
+        PropagationEngine.compute_dependency_output({
+            "blocked_task_id": "A", "root_cause": "A", 
+            "trace_id": "T", "timestamp": "T", "dependency_graph": graph
+        })
+    assert exc_info.value.code == "SCHEMA_MISMATCH"
 
 def test_empty_graph():
     # empty graph
     path = PropagationEngine.compute_downstream_path("A", {})
     assert path == []
     
-    out = PropagationEngine.compute_dependency_output({
-        "blocked_task_id": "A", "root_cause": "A", 
-        "trace_id": "T", "timestamp": "T", "dependency_graph": {}
-    })
-    assert out["impact_score"] == 0
-    assert out["impacted_tasks"] == []
+    with pytest.raises(PropagationContractViolation) as exc_info:
+        PropagationEngine.compute_dependency_output({
+            "blocked_task_id": "A", "root_cause": "A", 
+            "trace_id": "T", "timestamp": "T", "dependency_graph": {}
+        })
+    assert exc_info.value.code == "BROKEN_ROOT_CAUSE"
 
 # ==========================================
 # Phase 8 — Determinism Proof

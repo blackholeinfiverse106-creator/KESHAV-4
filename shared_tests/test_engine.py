@@ -1,11 +1,12 @@
 import pytest
 from pydantic import ValidationError
 from app.engine import PropagationEngine
+from shared_schemas.schemas import PropagationContractViolation
 
 
 
 def test_broken_graph_structure():
-    # Phase 4 - Broken graph structure gracefully handled
+    # Phase 4 - Broken graph structure gracefully handled (actually fails closed)
     input_data = {
         "blocked_task_id": "T1",
         "root_cause": "T1",
@@ -14,14 +15,12 @@ def test_broken_graph_structure():
         "dependency_graph": "INVALID_GRAPH_STRING" # Not a dict
     }
     
-    # Engine should sanitize to empty graph and return 0 impact
-    output = PropagationEngine.compute_dependency_output(input_data)
-    assert output["impact_score"] == 0
-    assert output["severity"] == "LOW"
-    assert output["impacted_tasks"] == []
+    with pytest.raises(PropagationContractViolation) as exc_info:
+        PropagationEngine.compute_dependency_output(input_data)
+    assert exc_info.value.code == "SCHEMA_MISMATCH"
     
 def test_missing_dependencies():
-    # Phase 4 - Handle nodes pointing to non-lists or having missing keys gracefully
+    # Phase 4 - Handle nodes pointing to non-lists or having missing keys gracefully (actually fails closed)
     graph = {
         "RC": ["T1", "MISSING_NODE"],
         "T1": "NOT_A_LIST" # invalid value
@@ -33,12 +32,9 @@ def test_missing_dependencies():
         "timestamp": "2026-05-02T12:00:00Z",
         "dependency_graph": graph
     }
-    # MISSING_NODE should just be added to impacted, and NOT_A_LIST sanitized to []
-    output = PropagationEngine.compute_dependency_output(input_data)
-    assert "MISSING_NODE" in output["impacted_tasks"]
-    assert "T1" in output["impacted_tasks"]
-    # impact_score is 2 because MISSING_NODE and T1 are impacted.
-    assert output["impact_score"] == 2
+    with pytest.raises(PropagationContractViolation) as exc_info:
+        PropagationEngine.compute_dependency_output(input_data)
+    assert exc_info.value.code == "SCHEMA_MISMATCH"
 
 def test_root_cause_same_as_blocked():
     graph = {

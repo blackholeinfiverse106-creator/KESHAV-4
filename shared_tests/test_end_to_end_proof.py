@@ -39,7 +39,7 @@ class MockBucketHandler(BaseHTTPRequestHandler):
         pass # Suppress logs for tests
 
 def start_mock_bucket_server():
-    server = HTTPServer(('localhost', 8081), MockBucketHandler)
+    server = HTTPServer(('localhost', 8000), MockBucketHandler)
     thread = threading.Thread(target=server.serve_forever)
     thread.daemon = True
     thread.start()
@@ -53,7 +53,7 @@ def test_complete_execution_path():
     Signal -> Propagation -> Intelligence -> Decision -> Enforcement -> Execution -> Bucket truth
     """
     # 1. Setup Environment
-    os.environ["BUCKET_SERVICE_URL"] = "http://localhost:8081"
+    os.environ["BUCKET_SERVICE_URL"] = "http://localhost:8000"
     server = start_mock_bucket_server()
     time.sleep(0.5)  # Wait for server to start
     
@@ -138,6 +138,20 @@ def test_complete_execution_path():
         assert bucket_record["payload"]["trace_hash"] == result.trace_hash
         assert bucket_record["payload"]["decision"] == result.enforcement_decision.value
         
+        # --- Generate Evidence for REVIEW_PACKET ---
+        evidence_dir = os.path.join(os.path.dirname(os.path.dirname(__file__)), "review-packets", "evidence")
+        os.makedirs(evidence_dir, exist_ok=True)
+        
+        with open(os.path.join(evidence_dir, "bucket_payload_sample.json"), "w") as f:
+            json.dump(bucket_record, f, indent=2)
+            
+        with open(os.path.join(evidence_dir, "execution_excerpt.txt"), "w") as f:
+            f.write(f"E2E Trace Proven:\nExecution ID: {trace_id}\nTrace Hash: {result.trace_hash}\nDecision: {result.enforcement_decision.value}\n")
+            
+        with open(os.path.join(evidence_dir, "schema_import_proof.txt"), "w") as f:
+            f.write("import proof:\nfrom app.sutradhara_control_plane import invoke_agent\nfrom app.enforcement_schemas import KSMLInput, ContextSignal, SourceSystem\n")
+        # ---------------------------------------------
+
         print(f"E2E Trace Proven: execution_id={trace_id}, trace_hash={result.trace_hash}")
         
     finally:

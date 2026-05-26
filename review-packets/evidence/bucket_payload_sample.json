@@ -1,0 +1,43 @@
+{
+  "artifact_id": "trace-e2e-878e3946",
+  "source_module_id": "bhiv_enforcement_gate",
+  "schema_version": "1.0.0",
+  "timestamp_utc": "2026-05-26T13:37:47.174460+00:00",
+  "artifact_type": "truth_event",
+  "payload": {
+    "request_payload": {
+      "execution_id": "trace-e2e-878e3946",
+      "actor": "SETU_INTEGRATION_TEST",
+      "proposed_action": "UNBLOCK_DEPENDENCY:RC",
+      "context_signals": [
+        {
+          "signal_id": "prop_impact",
+          "signal_type": "DEPENDENCY_IMPACT",
+          "value": 0.5,
+          "source": "KESHAV"
+        }
+      ],
+      "dgic_epistemic_state": {
+        "epistemic_state": "KNOWN",
+        "entropy_score": 0.0,
+        "contradiction_flag": false,
+        "lineage_hash": "1111111111111111111111111111111111111111111111111111111111111111",
+        "envelope_hash": "bc8326990370d3beff7b88a52d40f74f7b2debfbd4c1d09271e03b4ef5403086"
+      },
+      "source_system": "SOVEREIGN_CORE"
+    },
+    "dgic_snapshot": {
+      "epistemic_state": "KNOWN",
+      "entropy_score": 0.0,
+      "contradiction_flag": false,
+      "lineage_hash": "1111111111111111111111111111111111111111111111111111111111111111",
+      "envelope_hash": "bc8326990370d3beff7b88a52d40f74f7b2debfbd4c1d09271e03b4ef5403086"
+    },
+    "decision": "ALLOW",
+    "risk_score": 0.5,
+    "confidence": 1.0,
+    "failure_reason": null,
+    "trace_hash": "bc5f42b813296349daa1e81b171dc73848fc503c6985eec415ec6a3153523eda"
+  },
+  "artifact_hash": "ee33b8fcb967e4d428aef295e63ed2d1c9f12557495998181fbdb55f00dbd6a3"
+}

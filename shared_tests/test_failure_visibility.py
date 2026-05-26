@@ -1,4 +1,6 @@
 import pytest
+import os
+import traceback
 from app.engine import PropagationEngine
 from shared_schemas.schemas import PropagationContractViolation
 
@@ -13,6 +15,12 @@ def test_schema_mismatch():
     with pytest.raises(PropagationContractViolation) as exc_info:
         PropagationEngine.compute_dependency_output(invalid_input)
     assert exc_info.value.code == "SCHEMA_MISMATCH"
+    
+    # Generate Evidence
+    evidence_dir = os.path.join(os.path.dirname(os.path.dirname(__file__)), "review-packets", "evidence")
+    os.makedirs(evidence_dir, exist_ok=True)
+    with open(os.path.join(evidence_dir, "failure_stack_trace.txt"), "w") as f:
+        f.write("".join(traceback.format_exception(type(exc_info.value), exc_info.value, exc_info.value.__traceback__)))
 
 def test_malformed_trace_id():
     """Empty trace_id string"""
