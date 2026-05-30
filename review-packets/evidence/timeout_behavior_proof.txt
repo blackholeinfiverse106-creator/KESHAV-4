@@ -1,5 +1,5 @@
 Timeout Behavior Test:
 Graph Size: 500 nodes
-Engine Completion Time: 0.000247s
+Engine Completion Time: 0.000285s
 Impact Score: 500
 Severity: HIGH
