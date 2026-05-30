@@ -155,3 +155,6 @@ pytest shared_tests/test_adversarial_failures.py -v
 3. **NEVER** introduce `requests` or external network calls into `engine.py`.
 4. **NEVER** implement heuristic or machine-learning-based severity scoring inside KESHAV.
 5. **NEVER** catch `PropagationContractViolation` and return a "fallback" output. Fail closed.
+
+
+<!-- testing github from new device -->
