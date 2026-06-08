@@ -1,12 +1,12 @@
 {
-  "artifact_id": "trace-e2e-a559b375",
+  "artifact_id": "trace-e2e-7a0a5354",
   "source_module_id": "bhiv_enforcement_gate",
   "schema_version": "1.0.0",
-  "timestamp_utc": "2026-05-30T11:31:39.023222+00:00",
+  "timestamp_utc": "2026-06-06T11:17:04.537907+00:00",
   "artifact_type": "truth_event",
   "payload": {
     "request_payload": {
-      "execution_id": "trace-e2e-a559b375",
+      "execution_id": "trace-e2e-7a0a5354",
       "actor": "SETU_INTEGRATION_TEST",
       "proposed_action": "UNBLOCK_DEPENDENCY:RC",
       "context_signals": [
@@ -37,7 +37,7 @@
     "risk_score": 0.5,
     "confidence": 1.0,
     "failure_reason": null,
-    "trace_hash": "ae67e0362f2e5f1d846a5c82bcf8df2c7e3b2d62e7a513fcee35d42cfcde2be3"
+    "trace_hash": "26741d6cc2df523b2b195e968a9f03904163d8bee85bf203152f712ba3cbaf76"
   },
-  "artifact_hash": "8e5d1b8b46bf067046a05a518775d6276cd60c3851744efdbb8d5f6027ff6128"
+  "artifact_hash": "8df971a66a74cf325e1674e4844f671575dabfa3ee9647afbcf3ec8837e5e0cc"
 }

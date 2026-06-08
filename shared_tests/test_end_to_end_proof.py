@@ -64,7 +64,7 @@ def test_complete_execution_path():
         # Path swapping trick
         if 'app' in sys.modules:
             del sys.modules['app']
-        sys.path.insert(0, r'C:\blackhole\text-risk-scoring-service')
+        sys.path.insert(0, r'c:\rajaryan\text-risk-scoring-service')
         
         # Import live pipeline
         from app.sutradhara_control_plane import invoke_agent

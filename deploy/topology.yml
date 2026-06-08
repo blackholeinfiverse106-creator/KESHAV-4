@@ -19,7 +19,7 @@
 #   │  │  Port: N/A    │    │  ├─ RAJYA Verification                │ │
 #   │  │  (Library)    │    │  ├─ Sarathi Minting                   │ │
 #   │  └──────────────┘    │  ├─ Layer 4: Core Execution            │ │
-#   │                       │  └─ Layer 5: Bucket Writer             │ │
+#   │                       │  └─ Layer 5: Bucket Writer             │ │ 
 #   │                       │     Port: 8000 (configurable)          │ │
 #   │                       └───────────────────────────────────────┘ │
 #   │                                         │                       │
