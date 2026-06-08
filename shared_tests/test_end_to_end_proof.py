@@ -57,6 +57,29 @@ def test_complete_execution_path():
     server = start_mock_bucket_server()
     time.sleep(0.5)  # Wait for server to start
     
+    # Start KESHAV API server in a separate background process
+    import subprocess
+    import requests
+    keshav_process = subprocess.Popen(
+        [sys.executable, "-m", "uvicorn", "app.main:app", "--host", "127.0.0.1", "--port", "8081"],
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE
+    )
+    
+    # Wait for KESHAV API server to start
+    started = False
+    start_time = time.time()
+    while time.time() - start_time < 5:
+        try:
+            resp = requests.get("http://localhost:8081/health", timeout=1)
+            if resp.status_code == 200:
+                started = True
+                break
+        except Exception:
+            time.sleep(0.1)
+            
+    assert started, "KESHAV API server failed to start!"
+    
     try:
         # Import KESHAV-4
         from app.engine import PropagationEngine
@@ -82,8 +105,11 @@ def test_complete_execution_path():
             "dependency_graph": {"RC": ["T1", "T2"], "T1": ["T3"], "T2": ["T3"]}
         }
         
-        # 2. Propagation
-        prop_out = PropagationEngine.compute_dependency_output(prop_in)
+        # 2. Propagation (via HTTP API)
+        import requests
+        resp = requests.post("http://localhost:8081/api/v1/propagation", json=prop_in, timeout=5)
+        assert resp.status_code == 200, f"Propagation API failed: {resp.text}"
+        prop_out = resp.json()
         
         # Format envelope hash
         lineage_hash = "1" * 64
@@ -155,5 +181,8 @@ def test_complete_execution_path():
         print(f"E2E Trace Proven: execution_id={trace_id}, trace_hash={result.trace_hash}")
         
     finally:
+        if 'keshav_process' in locals():
+            keshav_process.terminate()
+            keshav_process.wait()
         server.shutdown()
         server.server_close()

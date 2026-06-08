@@ -41,14 +41,15 @@ services:
     description: >
       Stateless dependency propagation and impact analysis engine.
       Computes downstream blast radius via deterministic BFS traversal.
-      Does NOT expose a network port — consumed as a Python library.
-    type: library
+      Exposes a FastAPI service interface.
+    type: service
     language: python
     source: C:\blackhole\KESHAV-4
-    entry_point: app.engine.PropagationEngine
+    entry_point: app.main:app
+    port: 8081
     dependencies:
       - shared_schemas
-    health_check: app.health.check_health
+    health_check: http://localhost:8081/health
     state: stateless
     notes: >
       No runtime caches, no in-memory persistence, no transient state.
@@ -65,7 +66,7 @@ services:
     entry_point: app.sutradhara_control_plane.invoke_agent
     port: 8000
     dependencies:
-      - keshav4-propagation-engine (via path import)
+      - keshav4-propagation-engine (via FastAPI HTTP API on port 8081)
       - external-bucket-service
     environment:
       BUCKET_SERVICE_URL: "http://bucket-service:8000"
@@ -114,9 +115,9 @@ rollback:
 
 security:
   authentication: >
-    KESHAV-4 itself does not handle authentication. It is a library consumed
-    within the text-risk-scoring-service process boundary. Auth is handled
-    at the service ingress layer of text-risk-scoring-service.
+    KESHAV-4 is exposed as a network service but relies on internal network routing.
+    No direct user-facing auth is implemented. Auth is handled at the service
+    ingress layer of consuming systems.
   authorization: >
     The PropagationEngine has no authorization gates. All input validation
     is performed via Pydantic schema enforcement (fail-closed).
@@ -129,7 +130,7 @@ security:
 # =============================================================================
 
 observability:
-  health_endpoint: "python -m app.health"
+  health_endpoint: "http://localhost:8081/health"
   metrics:
     - name: propagation_latency_ms
       description: "Time to compute downstream path"

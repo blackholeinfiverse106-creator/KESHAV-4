@@ -10,9 +10,9 @@ Output:        trace-continuity-002
 Reconstructed: trace-continuity-002
 Match: True
 
-Input:         trace-continuity-3845
-Output:        trace-continuity-3845
-Reconstructed: trace-continuity-3845
+Input:         trace-continuity-7360
+Output:        trace-continuity-7360
+Reconstructed: trace-continuity-7360
 Match: True
 
 Input:         trace-with-special-chars-!@#$%

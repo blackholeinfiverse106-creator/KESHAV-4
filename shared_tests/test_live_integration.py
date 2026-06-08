@@ -56,7 +56,7 @@ class LiveIntegrationBucketHandler(BaseHTTPRequestHandler):
 def run_single_trace(trace_idx: int, graph: dict, blocked_task: str, root_cause: str):
     trace_id = f"trace-live-integration-{uuid.uuid4().hex[:10]}"
     
-    # 1. Propagation Engine (Phase 1 & 2)
+    # 1. Propagation Engine (via HTTP API)
     prop_in = {
         "blocked_task_id": blocked_task,
         "root_cause": root_cause,
@@ -64,7 +64,10 @@ def run_single_trace(trace_idx: int, graph: dict, blocked_task: str, root_cause:
         "timestamp": "2026-05-22T12:00:00Z",
         "dependency_graph": graph
     }
-    prop_out = PropagationEngine.compute_dependency_output(prop_in)
+    import requests
+    resp = requests.post("http://localhost:8081/api/v1/propagation", json=prop_in, timeout=5)
+    assert resp.status_code == 200, f"Propagation API failed: {resp.text}"
+    prop_out = resp.json()
     
     # Generate DGIC State for Integration
     lineage_hash = "1" * 64
@@ -131,6 +134,30 @@ def test_live_tantra_integration_and_determinism():
     time.sleep(0.5)  # Wait for server to start
     LiveIntegrationBucketHandler.store.clear()
     
+    # Start KESHAV API server in a separate background process
+    import subprocess
+    import requests
+    import sys
+    keshav_process = subprocess.Popen(
+        [sys.executable, "-m", "uvicorn", "app.main:app", "--host", "127.0.0.1", "--port", "8081"],
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE
+    )
+    
+    # Wait for KESHAV API server to start
+    started = False
+    start_time = time.time()
+    while time.time() - start_time < 5:
+        try:
+            resp = requests.get("http://localhost:8081/health", timeout=1)
+            if resp.status_code == 200:
+                started = True
+                break
+        except Exception:
+            time.sleep(0.1)
+            
+    assert started, "KESHAV API server failed to start!"
+    
     try:
         graphs = [
             # 1. Branching
@@ -167,5 +194,8 @@ def test_live_tantra_integration_and_determinism():
         # Verify bucket received artifacts
         assert len(LiveIntegrationBucketHandler.store) > 0, "No data reached the Bucket server during live integration!"
     finally:
+        if 'keshav_process' in locals():
+            keshav_process.terminate()
+            keshav_process.wait()
         server.shutdown()
         server.server_close()

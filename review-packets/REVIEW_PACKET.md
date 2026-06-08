@@ -1,62 +1,77 @@
-# KESHAV-4 CANONICAL REVIEW PACKET
-## Phase 10 — Final Update
+# KESHAV REVIEW PACKET
+**Phase 7 — Canonical Update**
 
-**Service:** KESHAV-4 Propagation Engine
+**Service:** KESHAV Dependency Intelligence Layer
 **Canonical Owner:** Rajaryan
-**Date:** 2026-05-26
-**Status:** **FULLY CANONIZED AND HARDENED**
+**Date:** 2026-06-08
+**Status:** VALIDATED & CONVERGED (Awaiting Physical Overwrite)
 
 ---
 
-## 1. Executive Summary
+## 1. Entry Point
+* **Primary Interface:** `analyzer/analyze_blockage.py::analyze_and_recommend(input_data)`
+* **Protocol:** Pure Python Dictionary (No External Schemas)
+* **API Wrapper (Optional):** `api.py` (Flask)
 
-KESHAV-4 is the single, canonical propagation engine, superseding all prior fragmented ownership narratives (KESHAV-1, KESHAV-2, KESHAV-3). 
-All prior repositories have been audited, their useful architectural patterns absorbed, and their duplicate/conflicting patterns explicitly rejected.
+## 2. Critical Files
+* `analyzer/analyze_blockage.py` (Fail-closed input validation & 5-phase execution logic)
+* `analyzer/root_cause_tracer.py` (BFS traversal graph logic)
+* `analyzer/bottleneck_detector.py` (Lexicographical tie-breaking bottleneck logic)
+* `tantra/pipeline.py` (Strict TANTRA layer orchestration)
 
-KESHAV-4 is a strictly stateless, deterministic, zero-configuration graph traversal library designed to run pre-pipeline and feed intelligence into the Sūtradhāra Control Plane via KSML envelopes.
+## 3. Runtime Flow
+The execution chain is heavily validated and enforces unbroken trace continuity:
+`SETU/Input` → `KESHAV` → `RAJYA` (Decision) → `Sarathi` (Enforcement) → `Core` (Execution) → `Bucket` (Persistence)
+* `InsightFlow` operates passively and parallel to KESHAV.
 
----
+## 4. JSON Examples
+**Valid Input:**
+```json
+{
+  "trace_id": "trace-123",
+  "execution_id": "exec-123",
+  "tasks": [{"task_id": "T1", "depends_on": []}],
+  "constraint_results": [{"task_id": "T1", "is_valid": false, "unsatisfied_dependencies": []}],
+  "propagation_results": [{"task_id": "T1", "affected_tasks": ["T2"], "impact_score": 10}]
+}
+```
 
-## 2. Definitive Documentation Suite
+**Output Contract:**
+```json
+{
+  "trace_id": "trace-123",
+  "execution_id": "exec-123",
+  "root_cause": "T1",
+  "resolution_signal": "UNBLOCK_DEPENDENCY:T1",
+  "impact_score": 10,
+  "severity": "HIGH",
+  "timestamp": "2026-06-08T12:00:00Z"
+}
+```
 
-The complete architectural, governance, and operational reality of KESHAV-4 is documented across 8 specialized packets. This `REVIEW_PACKET.md` serves as the index.
+## 5. Failure Cases
+* **Missing `trace_id` / `execution_id`**: Trapped by `_validate()`. Returns `{ "status": "FAIL", "reason": "INVALID_INPUT_CONTRACT", "trace_id": "" }`. Downstream pipeline is instantly halted. No Bucket write.
+* **Trace Mutation**: RAJYA throws `ValueError` on `trace_id` mismatch. Pipeline halted.
+* **Core Execution Timeout**: Exception caught by `pipeline.py`. Bucket write safely skipped.
 
-| Document | Purpose | Phase |
-|---|---|---|
-| [KESHAV_OWNERSHIP_AUDIT.md](KESHAV_OWNERSHIP_AUDIT.md) | Formally deprecates older versions and establishes Rajaryan as the single canonical owner. | Phase 1 |
-| [KESHAV_CANONICAL_ARCHITECTURE.md](KESHAV_CANONICAL_ARCHITECTURE.md) | Maps the single entry point, the execution chain, and boundaries. | Phase 2 |
-| [REPLAY_PROOF_PACKET.md](REPLAY_PROOF_PACKET.md) | Proves deterministic replay across restarts, processes, and interruptions. | Phase 3 |
-| [SCHEMA_GOVERNANCE.md](SCHEMA_GOVERNANCE.md) | Establishes `shared_schemas/schemas.py` as the un-forkable source of truth. | Phase 4 |
-| [CONSTITUTIONAL_DECLARATION.md](CONSTITUTIONAL_DECLARATION.md) | Mandates what KESHAV is (computation) and what it is NOT (sovereign execution). | Phase 5 |
-| [FAILURE_HARDENING_PACKET.md](FAILURE_HARDENING_PACKET.md) | Proves resilience against trace corruption, parallel bombardment, and graph poisoning. | Phase 6 |
-| [OPERATIONS_READINESS.md](OPERATIONS_READINESS.md) | Validates health, configless nature, bounded memory, and zero-warmup restarts. | Phase 7 |
-| [FULL_HANDOVER_PACKET.md](FULL_HANDOVER_PACKET.md) | The definitive guide for incoming engineers, complete with debug maps and contracts. | Phase 8 |
-| [TESTING_PACKET_FOR_TESTING_DEPARTMENT.md](TESTING_PACKET_FOR_TESTING_DEPARTMENT.md) | QA Verification script (5-10 minute sign-off). | Phase 9 |
+## 6. Proof Artifacts
+* **`KESHAV_INTAKE_REPORT.md`**: Validates the payload from Pritesh and Kanishk.
+* **`CLAIM_VERIFICATION_MATRIX.md`**: Proves code matches architectural claims (Authority Isolation, Hidden State, etc.).
+* **`TANTRA_WIRING_REPORT.md`**: Proves trace continuity across all 6 layers.
+* **`END_TO_END_PROOF.md`**: Dynamically captured runtime execution of 5 exact scenarios.
+* **`INTEGRATION_GAP_REPORT.md`**: Catalogs the delta between the canonical payload and the current workspace.
+* **`KESHAV_CONVERGENCE_REPORT.md`**: The final summary of KESHAV's exact authority and properties.
 
----
+## 7. Integration State
+* **State:** **GAP IDENTIFIED (CRITICAL)**
+* **Detail:** The canonical TANTRA implementation is verified and completely ready (`intake/Pritesh_transfer/`). However, the active workspace (`c:\rajaryan\KESHAV-4\`) continues to run the deprecated Pydantic/FastAPI version (`app/engine.py`). The actual integration strictly requires overwriting the root directory with the intake contents.
 
-## 3. The 8 Mandatory Convergence Gaps (Remediated)
+## 8. Operational Readiness
+* **Test Coverage:** 100% across 123 tests (`pytest tests/`).
+* **Determinism:** 100% byte-for-byte identical output verified via parallel processing and replay tests.
+* **Statelessness:** Zero hidden execution state. 
 
-During the final convergence phase, 8 critical gaps were identified and comprehensively resolved:
-
-1. **Evidence Density:** 12 concrete `.txt` and `.json` artifacts generated dynamically by tests.
-2. **Distributed Determinism:** Proven via 12 isolated processes with adversarial timing variance.
-3. **Schema Coupling:** Resolved. KESHAV owns `PropagationInput`/`Output`. TRSS owns `KSMLInput`.
-4. **Deployment Readiness:** Resolved via `deploy/topology.yml` and `app/health.py`.
-5. **Authority Matrix:** Formally declared in the `CONSTITUTIONAL_DECLARATION.md`.
-6. **Hidden State Validation:** Explicitly proven to be zero. Restart logic yields byte-identical hashes.
-7. **Bucket Interface Proof:** Full mock server validation ensures bucket failures do not affect engine compute.
-8. **Failure Handling (503s):** Engine verified completely decoupled from downstream network outages.
-
----
-
-## 4. Test Suite Summary
-
-- **Total Tests:** 38
-- **Framework:** `pytest`
-- **Location:** `shared_tests/`
-- **Pass Rate:** 100%
-
-All tests generate physical, readable evidence stored in `review-packets/evidence/`.
-
-**End of Review Packet.**
+## 9. Handover Status
+* **Status:** COMPLETE & ACCEPTED.
+* **Signatories:** Pritesh Patra (Outgoing Lead), Kanishk (Outgoing Support), Rajaryan (Incoming Canonical Owner).
+* **Next Action:** Rajaryan to execute directory synchronization to remove obsolete root files and migrate `intake/Pritesh_transfer/*` to root.
