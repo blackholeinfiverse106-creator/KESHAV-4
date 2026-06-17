@@ -48,7 +48,7 @@ Start the KESHAV Flask server to validate live HTTP interactions.
 # Start the server (leave this terminal running and open a new one for steps 4-6)
 python api.py
 ```
-**Expected Output:**
+**Expected Output:**                   
 * `* Running on http://127.0.0.1:5000`
 
 ---
@@ -113,4 +113,3 @@ curl -X POST http://localhost:5000/analyze `
 
 ## Sign-off & Final Verdict
 If all 6 steps produce the exact **Expected Output** listed above, the KESHAV-4 subsystem is fully validated and operationally sound. No further internal unit testing of the BFS graph algorithms or layer isolation is required.
--8-8-8-8-8-8--8
