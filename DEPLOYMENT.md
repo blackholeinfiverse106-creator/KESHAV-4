@@ -415,6 +415,65 @@ Use reverse proxy (Nginx, Traefik, Ingress) for TLS termination.
 
 ---
 
+## Rollback Procedure
+
+### Docker
+
+**Rollback to previous image:**
+```bash
+# Tag the known-good image before deploying
+docker tag keshav:latest keshav:previous
+
+# If the new deployment fails, restore the previous image
+docker stop keshav-api
+docker rm keshav-api
+docker run -d --name keshav-api -p 5000:5000 --restart unless-stopped keshav:previous
+```
+
+### Docker Compose
+
+**Rollback:**
+```bash
+docker-compose down
+# Revert to previous image tag in docker-compose.yml, then:
+docker-compose up -d
+```
+
+### Kubernetes
+
+**Rollback to previous revision:**
+```bash
+# View rollout history
+kubectl rollout history deployment/keshav-api -n keshav
+
+# Rollback to previous revision
+kubectl rollout undo deployment/keshav-api -n keshav
+
+# Rollback to specific revision
+kubectl rollout undo deployment/keshav-api -n keshav --to-revision=2
+
+# Verify rollback
+kubectl rollout status deployment/keshav-api -n keshav
+```
+
+### Bare Metal / Systemd
+
+**Rollback:**
+```bash
+# Stop the service
+sudo systemctl stop keshav
+
+# Revert the code
+cd /opt/keshav
+git checkout <previous-known-good-tag>
+pip install -e .
+
+# Restart
+sudo systemctl start keshav
+```
+
+---
+
 ## Troubleshooting
 
 ### High Latency
