@@ -1,5 +1,5 @@
 # TANTRA Wiring Proof
-**Generated:** 2026-06-17T10:29:45Z
+**Generated:** 2026-06-17T11:14:18Z
 **Chain:** SETU/Input → KESHAV → RAJYA → Sarathi → Core → Bucket → InsightFlow
 
 
@@ -84,7 +84,7 @@
     "resolution_signal": "UNBLOCK_DEPENDENCY:T1",
     "root_cause": "T1",
     "severity": "HIGH",
-    "timestamp": "2026-06-17T10:29:45Z",
+    "timestamp": "2026-06-17T11:14:18Z",
     "trace_id": "tantra-wiring-trace-001"
   },
   "rajya_output": {
@@ -93,7 +93,7 @@
     "resolution_signal": "UNBLOCK_DEPENDENCY:T1",
     "root_cause": "T1",
     "severity": "HIGH",
-    "timestamp": "2026-06-17T10:29:45Z",
+    "timestamp": "2026-06-17T11:14:18Z",
     "trace_id": "tantra-wiring-trace-001"
   },
   "sarathi_output": {
@@ -139,7 +139,7 @@
     "resolution_signal": "UNBLOCK_DEPENDENCY:T1",
     "root_cause": "T1",
     "severity": "HIGH",
-    "timestamp": "2026-06-17T10:29:45Z",
+    "timestamp": "2026-06-17T11:14:18Z",
     "trace_id": "tantra-wiring-trace-001"
   },
   "trace_id": "tantra-wiring-trace-001"
@@ -260,7 +260,7 @@
     "resolution_signal": null,
     "root_cause": null,
     "severity": "LOW",
-    "timestamp": "2026-06-17T10:29:45Z",
+    "timestamp": "2026-06-17T11:14:18Z",
     "trace_id": "tantra-wiring-trace-002"
   },
   "rajya_output": {
@@ -269,7 +269,7 @@
     "resolution_signal": null,
     "root_cause": null,
     "severity": "LOW",
-    "timestamp": "2026-06-17T10:29:45Z",
+    "timestamp": "2026-06-17T11:14:18Z",
     "trace_id": "tantra-wiring-trace-002"
   },
   "sarathi_output": {
@@ -316,7 +316,7 @@
     "resolution_signal": "UNBLOCK_DEPENDENCY:R1",
     "root_cause": "R1",
     "severity": "HIGH",
-    "timestamp": "2026-06-17T10:29:45Z",
+    "timestamp": "2026-06-17T11:14:18Z",
     "trace_id": "tantra-wiring-trace-003"
   },
   "sarathi_output": {
@@ -362,7 +362,7 @@ Validates each layer individually accepts the exact output of its upstream layer
   "resolution_signal": "UNBLOCK_DEPENDENCY:T1",
   "root_cause": "T1",
   "severity": "HIGH",
-  "timestamp": "2026-06-17T10:29:45Z",
+  "timestamp": "2026-06-17T11:14:18Z",
   "trace_id": "tantra-wiring-trace-001"
 }
 ```
@@ -377,7 +377,7 @@ Validates each layer individually accepts the exact output of its upstream layer
   "resolution_signal": "UNBLOCK_DEPENDENCY:T1",
   "root_cause": "T1",
   "severity": "HIGH",
-  "timestamp": "2026-06-17T10:29:45Z",
+  "timestamp": "2026-06-17T11:14:18Z",
   "trace_id": "tantra-wiring-trace-001"
 }
 ```
@@ -421,7 +421,7 @@ Validates each layer individually accepts the exact output of its upstream layer
     "resolution_signal": "UNBLOCK_DEPENDENCY:T1",
     "root_cause": "T1",
     "severity": "HIGH",
-    "timestamp": "2026-06-17T10:29:45Z",
+    "timestamp": "2026-06-17T11:14:18Z",
     "trace_id": "tantra-wiring-trace-001"
   },
   "trace_id": "tantra-wiring-trace-001"
