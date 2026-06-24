@@ -1,9 +1,9 @@
 # KESHAV Review Packet
 
 **Owner:** Rajaryan Verma
-**Date:** 2026-06-17
+**Date:** 2026-06-24
 **Sprint:** KESHAV Convergence Sprint (Phases 1-6)
-**State:** CANONICAL — Production Ready
+**State:** PARTIALLY CONVERGED — Logic Canonical, Operational Disconnect
 
 ---
 
@@ -149,6 +149,16 @@ KESHAV is 100% deterministically replayable:
 - `TANTRA_WIRING_PROOF.md`
 - `REPLAY_DETERMINISM_PROOF.md`
 - `PRODUCTION_HARDENING_PROOF.md`
+
+**Ecosystem Convergence Certification Deliverables (Phases 1-6):**
+- `ECOSYSTEM_PARTICIPANT_REGISTRY.md`
+- `RUNTIME_ATTACHMENT_AUDIT.md`
+- `LIVE_ECOSYSTEM_EXECUTION_PROOF.md`
+- `AUTHORITY_BOUNDARY_CERTIFICATION.md`
+- `TRUTH_LAYER_MATURITY_REPORT.md`
+- `KESHAV_ECOSYSTEM_CONVERGENCE_PACKET.md`
+- `ECOSYSTEM_CERTIFICATION_EVIDENCE.txt` (Testing Output)
+- `ecosystem_certification_test.py` (Testing Package for Testing Department)
 
 ---
 
