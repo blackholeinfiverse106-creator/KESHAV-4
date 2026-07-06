@@ -3,7 +3,7 @@
 **Owner:** Rajaryan Verma
 **Date:** 2026-06-24
 **Sprint:** KESHAV Convergence Sprint (Phases 1-6)
-**State:** PARTIALLY CONVERGED — Logic Canonical, Operational Disconnect
+**State:** FULLY CERTIFIED — Sovereign Capability Published
 
 ---
 
@@ -159,6 +159,16 @@ KESHAV is 100% deterministically replayable:
 - `KESHAV_ECOSYSTEM_CONVERGENCE_PACKET.md`
 - `ECOSYSTEM_CERTIFICATION_EVIDENCE.txt` (Testing Output)
 - `ecosystem_certification_test.py` (Testing Package for Testing Department)
+
+**Capability Publication Deliverables:**
+- `capability/KESHAV_CAPABILITY.md`
+- `capability/SERVICE_CONTRACT.md`
+- `capability/CAPABILITY_REGISTRY.md`
+- `capability/SEMANTIC_REGISTRY.md`
+- `capability/SCHEMA_REGISTRY.md`
+- `capability/CAPABILITY_CERTIFICATION_PACKET.md`
+- `capability/MULTI_CONSUMER_INTEGRATION_EVIDENCE.txt` (Integration Proof Output)
+- `capability/VINAYAK_TESTING_PACKAGE.md` (Testing Package for Vinayak)
 
 ---
 
