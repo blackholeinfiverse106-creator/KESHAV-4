@@ -50,10 +50,18 @@ def _validate(input_data: dict[str, Any]) -> None:
         )
     for list_field in ("tasks", "constraint_results", "propagation_results"):
         value = input_data.get(list_field)
-        if value is not None and not isinstance(value, list):
-            raise ValueError(
-                f"Field '{list_field}' must be a list, got {type(value).__name__}"
-            )
+        if value is not None:
+            if not isinstance(value, list):
+                raise ValueError(
+                    f"Field '{list_field}' must be a list, got {type(value).__name__}"
+                )
+            for item in value:
+                if not isinstance(item, dict):
+                    raise ValueError(f"Item in '{list_field}' must be a dict, got {type(item).__name__}")
+                if "task_id" not in item:
+                    raise ValueError(f"Missing 'task_id' in item of '{list_field}'")
+                if not isinstance(item["task_id"], str):
+                    raise ValueError(f"'task_id' must be a string in '{list_field}'")
 
 
 def analyze_and_recommend(input_data: dict[str, Any]) -> dict[str, Any]:

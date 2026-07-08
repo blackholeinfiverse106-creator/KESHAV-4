@@ -22,6 +22,7 @@ import logging
 import os
 
 from flask import Flask, jsonify, request
+from flasgger import Swagger
 
 import metrics
 from tantra.pipeline import run_tantra_pipeline
@@ -33,6 +34,7 @@ logging.basicConfig(
 logger = logging.getLogger("keshav.api")
 
 app = Flask(__name__)
+swagger = Swagger(app)
 
 _max_mb = int(os.environ.get("MAX_CONTENT_MB", 1))
 app.config["MAX_CONTENT_LENGTH"] = _max_mb * 1024 * 1024
@@ -73,6 +75,36 @@ def analyze():
     Returns 200 with TANTRA output on success.
     Returns 400 with FAIL response on invalid input.
     Returns 415 if Content-Type is not application/json.
+    ---
+    tags:
+      - TANTRA
+    parameters:
+      - in: body
+        name: body
+        required: true
+        schema:
+          type: object
+          required:
+            - trace_id
+            - execution_id
+          properties:
+            trace_id:
+              type: string
+              example: "upstream-trace-001"
+            execution_id:
+              type: string
+              example: "exec-001"
+            tasks:
+              type: array
+              items:
+                type: object
+    responses:
+      200:
+        description: TANTRA output on success
+      400:
+        description: Invalid input contract or pipeline failure
+      415:
+        description: Unsupported Media Type (not application/json)
     """
     start_time = metrics.record_request_start()
     
@@ -103,7 +135,14 @@ def analyze():
 
 @app.route("/health", methods=["GET"])
 def health():
-    """GET /health — liveness + readiness check."""
+    """GET /health — liveness + readiness check.
+    ---
+    tags:
+      - System
+    responses:
+      200:
+        description: OK
+    """
     return jsonify({"status": "OK", "service": "KESHAV"}), 200
 
 
