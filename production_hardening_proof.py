@@ -56,7 +56,8 @@ def _json_block(data) -> str:
     return f"```json\n{json.dumps(data, indent=2, sort_keys=True)}\n```"
 
 
-client = _api.app.test_client()
+from fastapi.testclient import TestClient
+client = TestClient(_api.app)
 
 timestamp = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
 log("# KESHAV Production Hardening Proof")
@@ -72,7 +73,7 @@ log("")
 
 # 1.1 Startup — health endpoint responds
 r = client.get("/health")
-data = r.get_json()
+data = r.json()
 log("### 1.1 Startup / Liveness Check")
 log(_json_block(data))
 assert_proof(r.status_code == 200, "GET /health returns 200")
@@ -84,10 +85,10 @@ log("")
 log("### 1.2 Readiness Check (Metrics)")
 r = client.get("/metrics")
 assert_proof(r.status_code == 200, "GET /metrics returns 200")
-assert_proof(b"keshav_requests_total" in r.data, "Prometheus metrics contain keshav_requests_total")
+assert_proof(b"keshav_requests_total" in r.content, "Prometheus metrics contain keshav_requests_total")
 
 r = client.get("/metrics/json")
-data = r.get_json()
+data = r.json()
 log(_json_block(data))
 assert_proof(r.status_code == 200, "GET /metrics/json returns 200")
 assert_proof("request_count" in data, "JSON metrics contain request_count")
@@ -98,7 +99,7 @@ assert_proof("avg_latency_seconds" in data, "JSON metrics contain avg_latency_se
 log("")
 log("### 1.3 Dependency Checks")
 required_modules = [
-    "flask", "analyzer.analyze_blockage", "tantra.pipeline",
+    "fastapi", "analyzer.analyze_blockage", "tantra.pipeline",
     "tantra.rajya", "tantra.sarathi", "tantra.core",
     "tantra.bucket", "tantra.insightflow", "metrics",
 ]
@@ -176,7 +177,7 @@ bucket_before = len(bucket.all_trace_ids())
 for case in failure_cases:
     log(f"### {case['name']}")
     r = client.post("/analyze", json=case["payload"])
-    data = r.get_json()
+    data = r.json()
     log(f"Input: `{json.dumps(case['payload'], sort_keys=True)[:100]}`")
     log(_json_block(data))
     assert_proof(r.status_code == case["expected_status"], f"HTTP {case['expected_status']} returned")
@@ -193,8 +194,8 @@ assert_proof(bucket_after == bucket_before, f"Bucket unchanged after all failure
 
 # 2.9 Wrong Content-Type
 log("### 2.9 Wrong Content-Type")
-r = client.post("/analyze", data="raw text", content_type="text/plain")
-data = r.get_json()
+r = client.post("/analyze", content=b"raw text", headers={"content-type": "text/plain"})
+data = r.json()
 log(_json_block(data))
 assert_proof(r.status_code == 415, "HTTP 415 for text/plain Content-Type")
 

@@ -1,5 +1,5 @@
 # KESHAV Production Hardening Proof
-**Generated:** 2026-06-17T11:14:21Z
+**Generated:** 2026-07-10T07:08:41Z
 
 ---
 ## Dimension 1: Health Validation
@@ -36,7 +36,7 @@
   PASS -- JSON metrics contain avg_latency_seconds
 
 ### 1.3 Dependency Checks
-  PASS -- Module 'flask' importable
+  PASS -- Module 'fastapi' importable
   PASS -- Module 'analyzer.analyze_blockage' importable
   PASS -- Module 'tantra.pipeline' importable
   PASS -- Module 'tantra.rajya' importable
@@ -207,7 +207,7 @@ keshav_request_success_rate 0.0000
 
 # HELP keshav_request_latency_seconds Request latency
 # TYPE keshav_request_latency_seconds summary
-keshav_request_latency_seconds{quantile="0.5"} 0.0002
+keshav_request_latency_seconds{quantile="0.5"} 0.0003
 keshav_request_latency_seconds{quantile="0.95"} 0.0003
 keshav_request_latency_seconds{quantile="0.99"} 0.0003
 

@@ -104,40 +104,39 @@ def test_insightflow_evicts_oldest_when_full(monkeypatch):
 @pytest.fixture()
 def client():
     from api import app
-    app.config["TESTING"] = True
-    with app.test_client() as c:
-        yield c
+    from fastapi.testclient import TestClient
+    yield TestClient(app)
 
 
 def test_api_404(client):
     resp = client.get("/nonexistent")
     assert resp.status_code == 404
-    assert resp.get_json()["reason"] == "NOT_FOUND"
+    assert resp.json()["reason"] == "NOT_FOUND"
 
 
 def test_api_405(client):
     resp = client.get("/analyze")
     assert resp.status_code == 405
-    assert resp.get_json()["reason"] == "METHOD_NOT_ALLOWED"
+    assert resp.json()["reason"] == "METHOD_NOT_ALLOWED"
 
 
 def test_api_413_request_too_large(client, monkeypatch):
-    from api import app
-    monkeypatch.setitem(app.config, "MAX_CONTENT_LENGTH", 1)  # 1 byte limit
+    import api
+    monkeypatch.setattr(api, "MAX_CONTENT_LENGTH", 1)  # 1 byte limit
     resp = client.post(
         "/analyze",
-        data=b'{"trace_id":"t","execution_id":"e"}',
-        content_type="application/json",
+        content=b'{"trace_id":"t","execution_id":"e"}',
+        headers={"content-type": "application/json"},
     )
     assert resp.status_code == 413
-    assert resp.get_json()["reason"] == "REQUEST_TOO_LARGE"
+    assert resp.json()["reason"] == "REQUEST_TOO_LARGE"
 
 
 def test_api_415_wrong_content_type(client):
-    resp = client.post("/analyze", data="hello", content_type="text/plain")
+    resp = client.post("/analyze", content=b"hello", headers={"content-type": "text/plain"})
     assert resp.status_code == 415
 
 
 def test_api_400_invalid_json(client):
-    resp = client.post("/analyze", data=b"{bad json", content_type="application/json")
+    resp = client.post("/analyze", content=b"{bad json", headers={"content-type": "application/json"})
     assert resp.status_code == 400

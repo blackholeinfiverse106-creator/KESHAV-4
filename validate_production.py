@@ -115,21 +115,22 @@ def check_api() -> bool:
             del sys.modules[mod]
 
     import api as _api
-    client = _api.app.test_client()
+    from fastapi.testclient import TestClient
+    client = TestClient(_api.app)
     all_ok = True
 
     # health
     r = client.get("/health")
-    if r.status_code == 200 and r.get_json().get("status") == "OK":
+    if r.status_code == 200 and r.json().get("status") == "OK":
         _ok("GET /health -> 200 OK")
     else:
-        _fail(f"GET /health -> {r.status_code} {r.data}")
+        _fail(f"GET /health -> {r.status_code} {r.content}")
         all_ok = False
 
     # valid analyze
     payload = json.loads(Path("sample_input.json").read_text())
     r = client.post("/analyze", json=payload)
-    data = r.get_json()
+    data = r.json()
     if r.status_code == 200 and "root_cause" in data and "severity" in data:
         _ok(f"POST /analyze -> 200, root_cause={data['root_cause']}, severity={data['severity']}")
     else:
