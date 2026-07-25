@@ -32,6 +32,7 @@ from starlette.requests import Request as StarletteRequest
 from starlette.responses import Response
 
 import metrics
+from tantra import bucket, core, rajya, sarathi
 from tantra.pipeline import run_tantra_pipeline
 
 logging.basicConfig(
@@ -143,6 +144,102 @@ async def analyze(request: Request, payload: Any = Body(
     severity = result["keshav_output"].get("severity", "UNKNOWN")
     metrics.record_request_success(start_time, severity, trace_id)
     return JSONResponse(result["keshav_output"], status_code=200)
+
+
+@app.post("/api/v1/rajya/validate", tags=["TANTRA", "RAJYA"], dependencies=[Depends(check_content_type)])
+@app.post("/rajya/consume", tags=["TANTRA", "RAJYA"], dependencies=[Depends(check_content_type)])
+async def rajya_validate_endpoint(
+    request: Request,
+    payload: Any = Body(
+        ...,
+        example={
+            "trace_id": "rajya-trace-001",
+            "execution_id": "exec-demo",
+            "root_cause": "T1 is blocked",
+            "resolution_signal": "UNBLOCK_DEPENDENCY:T1",
+            "impact_score": 10,
+            "severity": "HIGH",
+            "timestamp": "2026-07-25T10:00:00Z",
+        },
+    ),
+):
+    """
+    POST /api/v1/rajya/validate (also accessible at POST /rajya/consume)
+    Content-Type: application/json
+    Body: KESHAV output contract
+
+    Takes the output of KESHAV as input, consumes it through RAJYA, and passes it to Sarathi.
+    """
+    start_time = metrics.record_request_start()
+    try:
+        raw_body = await request.body()
+        if len(raw_body) > MAX_CONTENT_LENGTH:
+            metrics.record_request_error(start_time)
+            return JSONResponse(
+                {"status": "FAIL", "reason": "REQUEST_TOO_LARGE", "trace_id": ""},
+                status_code=413,
+            )
+        input_data = payload
+    except Exception:
+        metrics.record_request_error(start_time)
+        return JSONResponse(
+            {"status": "FAIL", "reason": "INVALID_JSON", "trace_id": ""},
+            status_code=400,
+        )
+
+    if not isinstance(input_data, dict) or not input_data.get("trace_id"):
+        metrics.record_request_error(start_time)
+        return JSONResponse(
+            {
+                "status": "FAIL",
+                "reason": "MISSING_TRACE_ID_OR_INVALID_PAYLOAD",
+                "trace_id": "",
+            },
+            status_code=400,
+        )
+
+    trace_id = str(input_data["trace_id"])
+    logger.info("POST /api/v1/rajya/validate trace_id=%s", trace_id)
+
+    try:
+        # 1. RAJYA directly consumes KESHAV output
+        rajya_output = rajya.consume(input_data, trace_id)
+
+        # 2. RAJYA's output is passed directly to Sarathi for enforcement
+        sarathi_output = sarathi.enforce(rajya_output)
+
+        # 3. Finalize execution layer in Core & Bucket
+        core_output = core.execute(sarathi_output)
+        bucket.write(core_output, input_data)
+
+        logger.info("RAJYA -> Sarathi OK trace_id=%s", trace_id)
+        severity = input_data.get("severity", "UNKNOWN")
+        metrics.record_request_success(start_time, severity, trace_id)
+
+        return JSONResponse(
+            {
+                "status": "EXECUTION_APPROVED",
+                "trace_id": trace_id,
+                "rajya_output": rajya_output,
+                "sarathi_output": sarathi_output,
+                "message": "KESHAV output successfully consumed by RAJYA and passed to Sarathi.",
+            },
+            status_code=200,
+        )
+    except ValueError as exc:
+        logger.warning("RAJYA/Sarathi contract violation trace_id=%s: %s", trace_id, exc)
+        metrics.record_request_error(start_time)
+        return JSONResponse(
+            {"status": "REJECT", "reason": str(exc), "trace_id": trace_id},
+            status_code=400,
+        )
+    except Exception as exc:
+        logger.exception("Unexpected error during RAJYA/Sarathi processing trace_id=%s", trace_id)
+        metrics.record_request_error(start_time)
+        return JSONResponse(
+            {"status": "FAIL", "reason": f"INTERNAL_ERROR: {exc}", "trace_id": trace_id},
+            status_code=500,
+        )
 
 
 @app.get("/health", tags=["System"])
