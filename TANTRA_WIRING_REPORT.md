@@ -131,16 +131,20 @@ To serve as the **Dependency Intelligence Layer**. It acts as the brain of the p
 
 ---
 
-### 3.2 KESHAV → RAJYA
+### 3.2 KESHAV → RAJYA (Decision & Adapter Layer)
 *   **File Location**: [rajya.py](file:///c:/rajaryan/KESHAV-4/tantra/rajya.py)
 *   **Execution Path**: `rajya.consume(keshav_output, trace_id)`
 *   **Trace Continuity Proof**: RAJYA enforces continuity via `if keshav_output["trace_id"] != expected_trace_id: raise ValueError(...)`.
 
 #### Work of this Phase
-RAJYA consumes KESHAV's structured analyzer results directly, performing a strict validation check on the `trace_id` and checking if KESHAV recorded a failure. It performs zero schema transformation.
+RAJYA consumes KESHAV's structured analyzer results directly. It performs strict validation checks on `trace_id` and verifies that KESHAV did not record a failure.
+**Thin TANTRA Compatibility Adapter**: To support external Sovereign-Core validation services (e.g., `https://text-risk-scoring-service.onrender.com/api/v1/rajya/validate`) without mutating the canonical TANTRA contract, RAJYA implements a lightweight adapter layer:
+1. Dynamically constructs expected structural governance tags (`sarathi_decision`, `sarathi_execution_id`, and `enforcement_verdict`).
+2. Issues an HTTP POST request to validate authorization against the external checkpoint.
+3. Upon receiving server approval (`EXECUTION_APPROVED`), returns the unmutated KESHAV output down the TANTRA chain so Sarathi can process it next.
 
 #### Purpose of this Phase
-To serve as the **Decision Layer**. It ensures that the analysis results are verified and trace integrity is fully intact before letting downstream execution components take action on the signal.
+To serve as the **Decision Layer & Compatibility Gatekeeper**. It ensures that the analysis results are verified and governance rules are authorized before letting downstream execution components take action on the signal.
 
 #### Input Contract
 *   The exact identical output dictionary returned by KESHAV's `analyze_and_recommend`.
@@ -368,7 +372,27 @@ Depending on status of `keshav_output`:
 
 ---
 
-## 4. Summary
-The full execution path is orchestrated by `tantra/pipeline.py::run_tantra_pipeline()`.
-**Actual Runtime Path Verified.** Trace continuity is unbroken, with all stages explicitly raising fail-closed `ValueError` if `trace_id` is missing or mismatched. There is no transformation of the core signal outside its intended boundaries.
+---
+
+## 4. Live API Endpoints & Operational Routes
+The KESHAV server (`https://keshav-cia7.onrender.com`) exposes two primary operational endpoints corresponding to different integration entry points:
+
+### 4.1 Full TANTRA Pipeline Endpoint
+*   **Route**: `POST https://keshav-cia7.onrender.com/analyze`
+*   **Input**: Raw SETU blockage graph payload (`tasks`, `constraint_results`, `propagation_results`).
+*   **Execution Behavior**: Triggers the entire canonical chain:
+    $$\text{SETU Input} \longrightarrow \textbf{KESHAV Analyzer} \longrightarrow \text{RAJYA} \longrightarrow \text{Sarathi} \longrightarrow \text{Core} \longrightarrow \text{Bucket}$$
+
+### 4.2 Dedicated RAJYA Validation & Sarathi Pass-through Endpoint
+*   **Route**: `POST https://keshav-cia7.onrender.com/api/v1/rajya/validate` *(Alias: `POST /rajya/consume`)*
+*   **Input**: Structured KESHAV output dictionary (`root_cause`, `resolution_signal`, `severity`, etc.).
+*   **Execution Behavior**: Skips diagnostic analysis and operates purely as an authority and enforcement gateway:
+    $$\textbf{KESHAV Output} \longrightarrow \textbf{RAJYA (via Thin Adapter)} \longrightarrow \textbf{Sarathi (Enforcement)} \longrightarrow \text{Core} \longrightarrow \text{Bucket}$$
+    Returns an integrated verdict containing both `rajya_output` and `sarathi_output`.
+
+---
+
+## 5. Summary
+The full execution path is orchestrated by `tantra/pipeline.py::run_tantra_pipeline()` and exposed via `api.py`.
+**Actual Runtime Path Verified.** Trace continuity is unbroken across both diagnostic and standalone validation endpoints, with all stages explicitly raising fail-closed `ValueError` if `trace_id` is missing or mismatched. The thin compatibility adapter bridges external governance checkpoints while preserving strict immutability across internal service layers.
 
