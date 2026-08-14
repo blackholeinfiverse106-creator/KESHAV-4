@@ -128,6 +128,11 @@ InsightFlow (tantra/insightflow.py) — read-only observability, structured even
 
 See `review-packets/REVIEW_PACKET.md` for full contract specification and convergence proof.
 
+## Frontend Integration
+
+The KESHAV backend is configured with CORS to accept cross-origin requests from the **Shakti** frontend application:
+- `https://niyantrankendra.blackholeinfiverse.com`
+
 ## Convergence Documentation
 
 **Constitutional Hardening:**
@@ -141,5 +146,5 @@ See `review-packets/REVIEW_PACKET.md` for full contract specification and conver
 - `OBSERVABILITY_INTEGRITY.md` — InsightFlow read-only, replay-safe, non-authoritative
 
 **Operational Handover:**
-- `OPERATIONAL_HANDOVER.md` — Complete stewardship package for Rajaryan Verma
+- `OPERATIONAL_HANDOVER.md` — Complete stewardship package for Blackhole Infiverse (blackholeinfiverse106@gmail.com)
 - `MAINTAINER_FAQ.md` — 50 Q&A for incoming maintainers
