@@ -26,6 +26,7 @@ from typing import Any, Dict, List, Optional
 from fastapi import FastAPI, Request, Body, Depends, HTTPException
 from fastapi.responses import JSONResponse
 from fastapi.exceptions import RequestValidationError
+from fastapi.middleware.cors import CORSMiddleware
 from starlette.exceptions import HTTPException as StarletteHTTPException
 from starlette.middleware.base import BaseHTTPMiddleware
 from starlette.requests import Request as StarletteRequest
@@ -45,6 +46,16 @@ _max_mb = int(os.environ.get("MAX_CONTENT_MB", 1))
 MAX_CONTENT_LENGTH = _max_mb * 1024 * 1024
 
 app = FastAPI(title="KESHAV API", description="FastAPI wrapper for the full TANTRA pipeline")
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=[
+        "https://niyantrankendra.blackholeinfiverse.com",
+    ],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 
 class ContentSizeLimitMiddleware(BaseHTTPMiddleware):
