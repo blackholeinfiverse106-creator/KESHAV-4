@@ -27,6 +27,7 @@ from fastapi import FastAPI, Request, Body, Depends, HTTPException
 from fastapi.responses import JSONResponse
 from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
+from starlette.concurrency import run_in_threadpool
 from starlette.exceptions import HTTPException as StarletteHTTPException
 from starlette.middleware.base import BaseHTTPMiddleware
 from starlette.requests import Request as StarletteRequest
@@ -144,7 +145,8 @@ async def analyze(request: Request, payload: Any = Body(
     trace_id = input_data.get("trace_id", "") if isinstance(input_data, dict) else ""
     logger.info("POST /analyze trace_id=%s", trace_id)
 
-    result = run_tantra_pipeline(input_data)
+    # Execute the blocking pipeline in the threadpool to avoid freezing the event loop
+    result = await run_in_threadpool(run_tantra_pipeline, input_data)
 
     if result["status"] == "FAIL":
         logger.warning("pipeline FAIL trace_id=%s error=%s", trace_id, result.get("error"))
@@ -212,16 +214,19 @@ async def rajya_validate_endpoint(
     trace_id = str(input_data["trace_id"])
     logger.info("POST /api/v1/rajya/validate trace_id=%s", trace_id)
 
-    try:
+    def _blocking_execution():
         # 1. RAJYA directly consumes KESHAV output
-        rajya_output = rajya.consume(input_data, trace_id)
-
+        rajya_out = rajya.consume(input_data, trace_id)
         # 2. RAJYA's output is passed directly to Sarathi for enforcement
-        sarathi_output = sarathi.enforce(rajya_output)
-
+        sarathi_out = sarathi.enforce(rajya_out)
         # 3. Finalize execution layer in Core & Bucket
-        core_output = core.execute(sarathi_output)
-        bucket.write(core_output, input_data)
+        core_out = core.execute(sarathi_out)
+        bucket.write(core_out, input_data)
+        return rajya_out, sarathi_out
+
+    try:
+        # Offload the blocking external network calls to the threadpool
+        rajya_output, sarathi_output = await run_in_threadpool(_blocking_execution)
 
         logger.info("RAJYA -> Sarathi OK trace_id=%s", trace_id)
         severity = input_data.get("severity", "UNKNOWN")
@@ -254,19 +259,19 @@ async def rajya_validate_endpoint(
 
 
 @app.get("/health", tags=["System"])
-def health():
+async def health():
     """GET /health — liveness + readiness check."""
     return JSONResponse({"status": "OK", "service": "KESHAV"}, status_code=200)
 
 
 @app.get("/metrics")
-def metrics_endpoint():
+async def metrics_endpoint():
     """GET /metrics — Prometheus-compatible metrics."""
     return Response(content=metrics.get_prometheus_metrics(), status_code=200, media_type="text/plain; charset=utf-8")
 
 
 @app.get("/metrics/json")
-def metrics_json():
+async def metrics_json():
     """GET /metrics/json — JSON metrics for debugging."""
     return JSONResponse(metrics.get_metrics(), status_code=200)
 
