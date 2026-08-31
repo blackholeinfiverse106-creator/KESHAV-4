@@ -1,12 +1,36 @@
+# Python bytecode & cache
 __pycache__/
 *.py[cod]
+*$py.class
+*.so
+.Python
 *.egg-info/
 .eggs/
 dist/
 build/
+
+# Testing & Coverage
 .pytest_cache/
 .mypy_cache/
 .ruff_cache/
 .coverage
 htmlcov/
 audit-artifacts/
+
+# Environment files (Never commit secrets)
+.env
+.env.*
+!.env.example
+
+# Deployment archives & generated files
+deployment.tar.gz
+docker-compose.production.yml
+
+# IDE & OS
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db

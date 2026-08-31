@@ -1,9 +1,8 @@
 services:
   keshav-backend:
-    build:
-      context: .
-      dockerfile: Dockerfile
-    container_name: keshav_backend
+    image: bhiv/keshav-backend:IMG_TAG
+    container_name: bhiv_keshav_backend
+    restart: unless-stopped
     ports:
       - "5003:5000"
     env_file:
@@ -11,13 +10,12 @@ services:
     environment:
       - HOST=0.0.0.0
       - PORT=5000
-    restart: unless-stopped
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:5000/health"]
-      interval: 30s
+      interval: 15s
       timeout: 5s
       retries: 3
-      start_period: 10s
+      start_period: 15s
     logging:
       driver: "json-file"
       options:
